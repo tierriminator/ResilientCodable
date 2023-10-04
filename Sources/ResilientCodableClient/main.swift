@@ -1,8 +1,23 @@
 import ResilientCodable
+import Foundation
 
-let a = 17
-let b = 25
+let json = """
+{
+    "foo" = 1
+}
+"""
 
-let (result, code) = #stringify(a + b)
+@ResilientCodable
+struct Foo: Codable {
+    var foo: Int = 0
+    var bar: String = "bar"
+}
 
-print("The value \(result) was produced by the code \"\(code)\"")
+let decoder = JSONDecoder()
+let data = json.data(using: .utf8)!
+do {
+    let foo = try decoder.decode(Foo.self, from: data)
+    print("foo is \(foo.foo) and bar is \(foo.bar)")
+} catch {
+    print(error.localizedDescription)
+}

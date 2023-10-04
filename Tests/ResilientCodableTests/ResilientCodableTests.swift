@@ -7,7 +7,7 @@ import XCTest
 import ResilientCodableMacros
 
 let testMacros: [String: Macro.Type] = [
-    "stringify": StringifyMacro.self,
+    "ResilientCodable": ResilientCodableMacro.self
 ]
 #endif
 
@@ -16,27 +16,27 @@ final class ResilientCodableTests: XCTestCase {
         #if canImport(ResilientCodableMacros)
         assertMacroExpansion(
             """
-            #stringify(a + b)
+            @ResilientCodable
+            struct Test: Codable {
+                var foo: Int = 0
+            }
             """,
             expandedSource: """
-            (a + b, "a + b")
+            struct Test: Codable {
+                var foo: Int = 0
+            
+                init(from decoder: Decoder) throws {
+                    let container = try decoder.container(keyedBy: CodingKeys.self)
+            
+                    do {
+                        if let foo = try container.decodeIfPresent(Int.self, forKey: .foo) {
+                            self.foo = foo
+                        }
+                    } catch {
+                    }
+                }
+            }
             """,
-            macros: testMacros
-        )
-        #else
-        throw XCTSkip("macros are only supported when running tests for the host platform")
-        #endif
-    }
-
-    func testMacroWithStringLiteral() throws {
-        #if canImport(ResilientCodableMacros)
-        assertMacroExpansion(
-            #"""
-            #stringify("Hello, \(name)")
-            """#,
-            expandedSource: #"""
-            ("Hello, \(name)", #""Hello, \(name)""#)
-            """#,
             macros: testMacros
         )
         #else
