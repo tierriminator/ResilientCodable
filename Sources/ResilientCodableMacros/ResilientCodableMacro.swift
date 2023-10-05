@@ -27,7 +27,7 @@ enum ResilientCodableDiagnostic: String, DiagnosticMessage {
     
 }
 
-public struct ResilientCodableMacro: MemberMacro {
+public struct ResilientCodableMacro: MemberMacro, ExtensionMacro {
     
     private static func writeDecodeBlocks(for variables: [(String, String)]) -> String {
         var output = ""
@@ -90,6 +90,24 @@ public struct ResilientCodableMacro: MemberMacro {
             }
             """
         ]
+    }
+    
+    public static func expansion(
+        of node: SwiftSyntax.AttributeSyntax,
+        attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
+        providingExtensionsOf type: some SwiftSyntax.TypeSyntaxProtocol,
+        conformingTo protocols: [SwiftSyntax.TypeSyntax],
+        in context: some SwiftSyntaxMacros.MacroExpansionContext
+    ) throws -> [SwiftSyntax.ExtensionDeclSyntax] {
+        guard !protocols.contains(where: {$0.description == "Codable"}) else {
+            return []
+        }
+        let output = try ExtensionDeclSyntax(
+            """
+            extension \(raw: type): Codable {}
+            """
+        )
+        return [output]
     }
 }
 

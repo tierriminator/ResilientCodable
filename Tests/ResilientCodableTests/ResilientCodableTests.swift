@@ -17,12 +17,12 @@ final class ResilientCodableTests: XCTestCase {
         assertMacroExpansion(
             """
             @ResilientCodable
-            struct Test: Codable {
+            struct Test {
                 var foo: Int = 0
             }
             """,
             expandedSource: """
-            struct Test: Codable {
+            struct Test {
                 var foo: Int = 0
             
                 init(from decoder: Decoder) throws {
@@ -35,6 +35,9 @@ final class ResilientCodableTests: XCTestCase {
                     } catch {
                     }
                 }
+            }
+            
+            extension Test: Codable {
             }
             """,
             macros: testMacros

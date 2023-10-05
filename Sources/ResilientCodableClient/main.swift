@@ -8,7 +8,7 @@ let json = """
 """
 
 @ResilientCodable
-struct Foo: Codable {
+struct Foo {
     var foo: Int = 0
     var bar: String = "bar"
 }
